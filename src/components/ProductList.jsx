@@ -15,14 +15,24 @@ function ProductList({ products, onSelectionChange }) {
 
   return (
     <div className="product-list">
-      {products.map((product) => (
-        <ProductItem
-          key={product.id}
-          product={product}
-          isSelected={selectedProducts.includes(product.id)}
-          onToggle={handleToggle}
-        />
-      ))}
+      <ProductItem
+        key={products[0].id}
+        product={products[0]}
+        isSelected={selectedProducts.includes(products[0].id)}
+        onToggle={handleToggle}
+      />
+      <ProductItem
+        key={products[1].id}
+        product={products[1]}
+        isSelected={selectedProducts.includes(products[1].id)}
+        onToggle={handleToggle}
+      />
+      <ProductItem
+        key={products[2].id}
+        product={products[2]}
+        isSelected={selectedProducts.includes(products[2].id)}
+        onToggle={handleToggle}
+      />
     </div>
   );
 }
