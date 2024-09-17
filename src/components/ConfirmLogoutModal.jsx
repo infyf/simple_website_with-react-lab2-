@@ -1,5 +1,5 @@
 import React from 'react';
-import './ConfirmLogoutModal.css'; // Переконайся, що шлях правильний
+import './ConfirmLogoutModal.css'; 
 
 const ConfirmLogoutModal = ({ onConfirm, onCancel }) => {
   return (
