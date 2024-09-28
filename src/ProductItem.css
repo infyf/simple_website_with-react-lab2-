@@ -1,0 +1,17 @@
+.product-list {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.product-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+  width: 30%;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+}
