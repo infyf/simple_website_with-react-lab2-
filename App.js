@@ -3,27 +3,41 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
 import LoginForm from './components/LoginForm';
-import ConfirmLogoutModal from './components/ConfirmLogoutModal';
+import ConfirmAddToCartModal from './components/ConfirmAddToCartModal';
+import Cart from './components/Cart';
 import { ProductProvider, useProduct } from './context/ProductContext';
-import useNavigationHistory from './hooks/useNavigationHistory'; // імпорт хуку
-import DebugWindow from './components/DebugWindow'; // імпорт DebugWindow
-
+import { FaShoppingCart } from 'react-icons/fa'; // Імпортуємо значок кошика
 import './App.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginForm, setShowLoginForm] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false);
+  const [cartItems, setCartItems] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
     setShowLoginForm(false);
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setShowLogoutModal(false);
-    alert('Ви вийшли з системи');
+  const addToCart = (product) => {
+    setCartItems(prevItems => {
+      const newItems = { ...prevItems };
+      if (newItems[product.id]) {
+        newItems[product.id].quantity += 1;
+      } else {
+        newItems[product.id] = { ...product, quantity: 1 };
+      }
+      return newItems;
+    });
+
+    setTotalPrice(prevTotal => prevTotal + product.price);
+    setShowAddToCartModal(true);
+  };
+
+  const handleConfirmAddToCart = () => {
+    setShowAddToCartModal(false);
   };
 
   return (
@@ -32,28 +46,41 @@ function App() {
         <div className="App">
           <Header
             isLoggedIn={isLoggedIn}
-            selectedCount={0} // Це буде оброблятися через контекст
+            selectedCount={Object.keys(cartItems).length}
             onLogin={() => setShowLoginForm(true)}
-            onLogout={() => setShowLogoutModal(true)}
+            onLogout={() => alert('Ви вийшли з системи')}
           />
 
           <nav>
-            <ul>
-              <li><Link to="/phones">Телефони</Link></li>
-              <li><Link to="/laptops">Ноутбуки</Link></li>
-              <li><Link to="/accessories">Аксесуари</Link></li>
+            <ul className="nav">
+              <li className="nav-item"><Link className="nav-link" to="/phones">Телефони</Link></li>
+              <li className="nav-item"><Link className="nav-link" to="/laptops">Ноутбуки</Link></li>
+              <li className="nav-item"><Link className="nav-link" to="/accessories">Аксесуари</Link></li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/cart">
+                  <FaShoppingCart /> Кошик {Object.keys(cartItems).length > 0 && `(${Object.keys(cartItems).length})`}
+                </Link>
+              </li>
             </ul>
           </nav>
 
-          {/* Використовуємо useNavigationHistory всередині Router */}
-          <NavigationWithHistory />
+          <Routes>
+            <Route path="/phones" element={<ProductCategory category="phones" addToCart={addToCart} />} />
+            <Route path="/laptops" element={<ProductCategory category="laptops" addToCart={addToCart} />} />
+            <Route path="/accessories" element={<ProductCategory category="accessories" addToCart={addToCart} />} />
+            <Route path="/cart" element={<Cart items={cartItems} totalPrice={totalPrice} />} />
+          </Routes>
 
           {showLoginForm && (
             <LoginForm onLogin={handleLogin} onClose={() => setShowLoginForm(false)} />
           )}
 
-          {showLogoutModal && (
-            <ConfirmLogoutModal onConfirm={handleLogout} onCancel={() => setShowLogoutModal(false)} />
+          {showAddToCartModal && (
+            <ConfirmAddToCartModal
+              show={showAddToCartModal}
+              onConfirm={handleConfirmAddToCart}
+              onCancel={() => setShowAddToCartModal(false)}
+            />
           )}
         </div>
       </Router>
@@ -61,30 +88,11 @@ function App() {
   );
 }
 
-function NavigationWithHistory() {
-  const history = useNavigationHistory(); // Використання хуку
+function ProductCategory({ category, addToCart }) {
+  const { products } = useProduct();
   return (
-    <>
-      <Routes>
-        <Route path="/phones" element={<ProductCategory category="phones" />} />
-        <Route path="/laptops" element={<ProductCategory category="laptops" />} />
-        <Route path="/accessories" element={<ProductCategory category="accessories" />} />
-      </Routes>
-
-      <TotalPriceDisplay /> 
-      <DebugWindow history={history} /> 
-    </>
+    <ProductList products={products[category]} category={category} onAddToCart={addToCart} />
   );
-}
-
-function TotalPriceDisplay() {
-  const { totalPrice } = useProduct(); // Отримуємо загальну суму з контексту
-  return <h2>Загальна сума: {totalPrice} грн</h2>;
-}
-
-function ProductCategory({ category }) {
-  const { products } = useProduct(); // Використовуйте useProduct тут
-  return <ProductList products={products[category]} category={category} />; // Передайте category
 }
 
 export default App;

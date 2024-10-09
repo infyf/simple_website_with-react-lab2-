@@ -1,0 +1,35 @@
+.cart {
+  padding: 20px;
+}
+
+.cart-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  transition: all 0.3s ease;
+}
+
+.cart-item-enter {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.cart-item-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.cart-item-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cart-item-exit-active {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 300ms, transform 300ms;
+}
+.total-price {
+  font-weight: bold;
+  margin-top: 20px;
+}

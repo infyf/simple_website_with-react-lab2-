@@ -1,13 +1,13 @@
 import React from 'react';
 import './ProductItem.css';
 
-function ProductItem({ product, isSelected, onToggle }) {
+function ProductItem({ product, onAddToCart }) {
   return (
-    <div className={`product-item ${isSelected ? 'selected' : ''}`} onClick={() => onToggle(product.id)}>
+    <div className="product-item">
       <img src={product.image} alt={product.name} className="product-image" />
       <h3>{product.name}</h3>
       <p>Ціна: {product.price} грн</p>
-      <input type="checkbox" checked={isSelected} readOnly />
+      <button onClick={() => onAddToCart(product)}>Додати до кошика</button>
     </div>
   );
 }
