@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Switch, ConfigProvider } from 'antd';
 import Header from './components/Header';
 import ProductList from './components/ProductList';
 import LoginForm from './components/LoginForm';
 import ConfirmAddToCartModal from './components/ConfirmAddToCartModal';
 import Cart from './components/Cart';
 import { ProductProvider, useProduct } from './context/ProductContext';
-import { FaShoppingCart } from 'react-icons/fa'; // Імпортуємо значок кошика
+import { FaShoppingCart } from 'react-icons/fa';
 import './App.css';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [cartItems, setCartItems] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -40,51 +42,71 @@ function App() {
     setShowAddToCartModal(false);
   };
 
+  const toggleTheme = (checked) => {
+    setIsDarkTheme(checked);
+    document.body.className = checked ? 'dark-theme' : 'light-theme'; // Зміна класу body завдання 4
+  };
+
+  // Встановлення класу body при завантаженні
+  useEffect(() => {
+    document.body.className = isDarkTheme ? 'dark-theme' : 'light-theme';
+  }, [isDarkTheme]);
+
   return (
-    <ProductProvider>
-      <Router>
-        <div className="App">
-          <Header
-            isLoggedIn={isLoggedIn}
-            selectedCount={Object.keys(cartItems).length}
-            onLogin={() => setShowLoginForm(true)}
-            onLogout={() => alert('Ви вийшли з системи')}
-          />
-
-          <nav>
-            <ul className="nav">
-              <li className="nav-item"><Link className="nav-link" to="/phones">Телефони</Link></li>
-              <li className="nav-item"><Link className="nav-link" to="/laptops">Ноутбуки</Link></li>
-              <li className="nav-item"><Link className="nav-link" to="/accessories">Аксесуари</Link></li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/cart">
-                  <FaShoppingCart /> Кошик {Object.keys(cartItems).length > 0 && `(${Object.keys(cartItems).length})`}
-                </Link>
-              </li>
-            </ul>
-          </nav>
-
-          <Routes>
-            <Route path="/phones" element={<ProductCategory category="phones" addToCart={addToCart} />} />
-            <Route path="/laptops" element={<ProductCategory category="laptops" addToCart={addToCart} />} />
-            <Route path="/accessories" element={<ProductCategory category="accessories" addToCart={addToCart} />} />
-            <Route path="/cart" element={<Cart items={cartItems} totalPrice={totalPrice} />} />
-          </Routes>
-
-          {showLoginForm && (
-            <LoginForm onLogin={handleLogin} onClose={() => setShowLoginForm(false)} />
-          )}
-
-          {showAddToCartModal && (
-            <ConfirmAddToCartModal
-              show={showAddToCartModal}
-              onConfirm={handleConfirmAddToCart}
-              onCancel={() => setShowAddToCartModal(false)}
+    <ConfigProvider theme={{ token: { colorBgBase: isDarkTheme ? '#1f1f1f' : '#fff', colorTextBase: isDarkTheme ? '#ffffff' : '#000000' } }}>
+      <ProductProvider>
+        <Router>
+          <div className={`App ${isDarkTheme ? 'dark' : 'light'}`}>
+            <Header
+              isLoggedIn={isLoggedIn}
+              onLogin={() => setShowLoginForm(true)}
+              onLogout={() => setIsLoggedIn(false)}
             />
-          )}
-        </div>
-      </Router>
-    </ProductProvider>
+
+            <div className="theme-switcher">
+              <Switch
+                checkedChildren="Black"
+                unCheckedChildren="Light"
+                onChange={toggleTheme}
+                checked={isDarkTheme}
+              />
+            </div>
+
+            <nav>
+              <ul className="nav">
+                <li className="nav-item"><Link className="nav-link" to="/phones">Телефони</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/laptops">Ноутбуки</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/accessories">Аксесуари</Link></li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/cart">
+                    <FaShoppingCart /> Кошик {Object.keys(cartItems).length > 0 && `(${Object.keys(cartItems).length})`}
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            <Routes>
+              <Route path="/phones" element={<ProductCategory category="phones" addToCart={addToCart} />} />
+              <Route path="/laptops" element={<ProductCategory category="laptops" addToCart={addToCart} />} />
+              <Route path="/accessories" element={<ProductCategory category="accessories" addToCart={addToCart} />} />
+              <Route path="/cart" element={<Cart items={cartItems} totalPrice={totalPrice} />} />
+            </Routes>
+
+            {showLoginForm && (
+              <LoginForm onLogin={handleLogin} onClose={() => setShowLoginForm(false)} />
+            )}
+
+            {showAddToCartModal && (
+              <ConfirmAddToCartModal
+                show={showAddToCartModal}
+                onConfirm={handleConfirmAddToCart}
+                onCancel={() => setShowAddToCartModal(false)}
+              />
+            )}
+          </div>
+        </Router>
+      </ProductProvider>
+    </ConfigProvider>
   );
 }
 
